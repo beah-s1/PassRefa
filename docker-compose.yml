@@ -8,10 +8,12 @@ services:
       - "DATABASE_HOST=db"
       - "DATABASE_USER=passrefa"
       - "DATABASE_PASSWORD=ebmtPpxbnkOe7DZqjHKhLgn3smB5K066"
+    env_file:
+      - ".env"
     volumes:
-    - ".:/usr/src/app"
+      - ".:/usr/src/app"
     links:
-    - "db"
+      - "db"
   db:
     image: postgres:12-alpine
     ports:
