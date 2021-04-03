@@ -18,6 +18,10 @@ class ApplicationController < ActionController::Base
     redirect_to "/auth"
   end
   
+  def health_check
+    render plain: "OK"
+  end
+  
   helper_method :check_sign_in_status
   helper_method :check_api_access
 end
