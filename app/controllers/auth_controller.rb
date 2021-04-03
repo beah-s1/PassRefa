@@ -62,6 +62,7 @@ class AuthController < ApplicationController
       user.oidc_identifier = userinfo["sub"]
     end
 
+    user.name = userinfo["name"]
     user.email = userinfo["email"]
     user.oidc_access_token = response_dict["access_token"]
     user.oidc_refresh_token = response_dict["refresh_token"] if response_dict["refresh_token"].present?

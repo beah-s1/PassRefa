@@ -1,6 +1,9 @@
 class HomeController < ApplicationController
-  def index
+  before_action :check_sign_in_status, only: [:index]
+  before_action :check_api_access, only: [:ekispert_key]
   
+  def index
+    check_sign_in_status
   end
   
   def ekispert_key
