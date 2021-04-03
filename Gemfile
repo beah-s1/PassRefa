@@ -20,6 +20,8 @@ gem 'jbuilder', '~> 2.7'
 
 gem 'i18n'
 gem 'devise'
+gem 'jwt'
+gem 'json-jwt'
 
 # Use Redis adapter to run Action Cable in production
 # gem 'redis', '~> 4.0'
