@@ -6,7 +6,7 @@ require 'net/http'
 require 'jwt'
 require 'json/jwt'
 class AuthController < ApplicationController
-  
+  include Devise::Controllers::SignInOut
   
   def auth
     oidc_configuration = JSON.parse(open(ENV['OIDC_CONFIGURATION_URL']).read)
@@ -47,14 +47,28 @@ class AuthController < ApplicationController
     id_token = JWT.decode(response_dict['id_token'], JSON::JWK.new(jwk).to_key, true, :algorithm => jwk["alg"])
     
     userinfo = id_token[0]
-    
     # userinfoの検証
     time = DateTime.now
-    if userinfo["iss"] != oidc_configuration["issuer"] or userinfo["aud"] != ENV['OIDC_CLIENT_ID'] or userinfo["exp"] < time.to_i or time.to_i < userinfo["iat"] then
+    if userinfo["iss"] != oidc_configuration["issuer"] or userinfo["aud"] != ENV['OIDC_CLIENT_ID'] or userinfo["iat"] > time.to_i or time.to_i > userinfo["exp"] then
       render plain: "invalid credential data", status: 400
       return
     end
     
+    # ローカルユーザーの取得/新規作成
+    user = User.find_by_oidc_identifier(userinfo["sub"])
+    if !user.present? then
+      user = User.new
+      user.password = SecureRandom.alphanumeric(64)
+      user.oidc_identifier = userinfo["sub"]
+    end
+
+    user.email = userinfo["email"]
+    user.oidc_access_token = response_dict["access_token"]
+    user.oidc_refresh_token = response_dict["refresh_token"] if response_dict["refresh_token"].present?
     
+    user.save()
+    
+    sign_in user
+    redirect_to "/"
   end
 end
